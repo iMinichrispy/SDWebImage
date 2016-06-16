@@ -179,14 +179,14 @@
 /**
  *  Show activity UIActivityIndicatorView
  */
-- (void)setShowActivityIndicatorView:(BOOL)show;
+- (void)sd_setShowActivityIndicatorView:(BOOL)show;
 
 /**
  *  set desired UIActivityIndicatorViewStyle
  *
  *  @param style The style of the UIActivityIndicatorView
  */
-- (void)setIndicatorStyle:(UIActivityIndicatorViewStyle)style;
+- (void)sd_setIndicatorStyle:(UIActivityIndicatorViewStyle)style;
 
 @end
 
