@@ -11,6 +11,9 @@
 #import "UIView+WebCacheOperation.h"
 
 static char imageURLStorageKey;
+static char TAG_ACTIVITY_INDICATOR;
+static char TAG_ACTIVITY_STYLE;
+static char TAG_ACTIVITY_SHOW;
 
 @implementation UIButton (WebCache)
 
@@ -171,6 +174,68 @@ static char imageURLStorageKey;
     }
 
     return storage;
+}
+
+- (UIActivityIndicatorView *)activityIndicator {
+    return (UIActivityIndicatorView *)objc_getAssociatedObject(self, &TAG_ACTIVITY_INDICATOR);
+}
+
+- (void)setActivityIndicator:(UIActivityIndicatorView *)activityIndicator {
+    objc_setAssociatedObject(self, &TAG_ACTIVITY_INDICATOR, activityIndicator, OBJC_ASSOCIATION_RETAIN);
+}
+
+- (void)sd_setShowActivityIndicatorView:(BOOL)show{
+    objc_setAssociatedObject(self, &TAG_ACTIVITY_SHOW, [NSNumber numberWithBool:show], OBJC_ASSOCIATION_RETAIN);
+}
+
+- (BOOL)showActivityIndicatorView{
+    return [objc_getAssociatedObject(self, &TAG_ACTIVITY_SHOW) boolValue];
+}
+
+- (void)sd_setIndicatorStyle:(UIActivityIndicatorViewStyle)style{
+    objc_setAssociatedObject(self, &TAG_ACTIVITY_STYLE, [NSNumber numberWithInt:style], OBJC_ASSOCIATION_RETAIN);
+}
+
+- (int)getIndicatorStyle{
+    return [objc_getAssociatedObject(self, &TAG_ACTIVITY_STYLE) intValue];
+}
+
+- (void)addActivityIndicator {
+    if (!self.activityIndicator) {
+        self.activityIndicator = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:[self getIndicatorStyle]];
+        self.activityIndicator.translatesAutoresizingMaskIntoConstraints = NO;
+        
+        dispatch_main_async_safe(^{
+            [self addSubview:self.activityIndicator];
+            
+            [self addConstraint:[NSLayoutConstraint constraintWithItem:self.activityIndicator
+                                                             attribute:NSLayoutAttributeCenterX
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self
+                                                             attribute:NSLayoutAttributeCenterX
+                                                            multiplier:1.0
+                                                              constant:0.0]];
+            [self addConstraint:[NSLayoutConstraint constraintWithItem:self.activityIndicator
+                                                             attribute:NSLayoutAttributeCenterY
+                                                             relatedBy:NSLayoutRelationEqual
+                                                                toItem:self
+                                                             attribute:NSLayoutAttributeCenterY
+                                                            multiplier:1.0
+                                                              constant:0.0]];
+        });
+    }
+    
+    dispatch_main_async_safe(^{
+        [self.activityIndicator startAnimating];
+    });
+    
+}
+
+- (void)removeActivityIndicator {
+    if (self.activityIndicator) {
+        [self.activityIndicator removeFromSuperview];
+        self.activityIndicator = nil;
+    }
 }
 
 @end
