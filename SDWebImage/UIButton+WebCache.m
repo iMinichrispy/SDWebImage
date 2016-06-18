@@ -59,7 +59,9 @@ static char TAG_ACTIVITY_SHOW;
     if (!url) {
         [self.imageURLStorage removeObjectForKey:@(state)];
         
+        __weak __typeof(self)wself = self;
         dispatch_main_async_safe(^{
+            [wself removeActivityIndicator];
             if (completedBlock) {
                 NSError *error = [NSError errorWithDomain:SDWebImageErrorDomain code:-1 userInfo:@{NSLocalizedDescriptionKey : @"Trying to load a nil url"}];
                 completedBlock(nil, error, SDImageCacheTypeNone, url);
@@ -69,12 +71,18 @@ static char TAG_ACTIVITY_SHOW;
         return;
     }
     
+    // check if activityView is enabled or not
+    if ([self showActivityIndicatorView]) {
+        [self addActivityIndicator];
+    }
+    
     self.imageURLStorage[@(state)] = url;
 
     __weak __typeof(self)wself = self;
     id <SDWebImageOperation> operation = [SDWebImageManager.sharedManager downloadImageWithURL:url options:options progress:nil completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType, BOOL finished, NSURL *imageURL) {
         if (!wself) return;
         dispatch_main_sync_safe(^{
+            [wself removeActivityIndicator];
             __strong UIButton *sself = wself;
             if (!sself) return;
             if (image && (options & SDWebImageAvoidAutoSetImage) && completedBlock)
